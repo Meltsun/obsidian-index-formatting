@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-title-index",
+  "name": "obsidian-index-formatting",
   "version": "0.4.0",
-  "description": "add title index",
+  "description": "to do",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
