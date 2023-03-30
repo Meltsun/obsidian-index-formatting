@@ -1,9 +1,9 @@
 {
-  "id": "obsidian-index-formatting",
-  "name": "Index Formatting",
-  "version": "0.0.1",
-  "description": "为标题添加序号，序号格式化，序号标题互转",
-  "author": "Meltsun",
-  "authorUrl": "https://github.com/Meltsun/obsidian-markdown-index-formatting",
-  "isDesktopOnly": false
+    "id": "obsidian-index-formatting",
+    "name": "Index Formatting",
+    "version": "0.0.1",
+    "description": "为标题添加序号，序号格式化，序号标题互转",
+    "author": "Meltsun",
+    "authorUrl": "https://github.com/Meltsun/obsidian-markdown-index-formatting",
+    "isDesktopOnly": false
 }
