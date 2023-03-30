@@ -1,6 +1,7 @@
 import { Plugin, MarkdownView,Notice} from "obsidian";
-import { MarkdownIndex } from "./indexFormatter";
+//import { MarkdownIndex } from "./indexFormatter_old";
 import { mySettingTab} from "./mySettingTab";
+import {IndexFormatter} from "./indexFormatter"
 
 interface mySetting{
     testSetting1: string;
@@ -12,7 +13,7 @@ const MY_DEFAULT_SETTING: mySetting = {
 
 export default class myPlugin extends Plugin {
     settings:mySetting
-
+    indexFormatter:IndexFormatter
     async loadSettings() {
         this.settings = Object.assign({}, MY_DEFAULT_SETTING, await this.loadData());
     }
@@ -23,10 +24,11 @@ export default class myPlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
-        //添加设置栏
+
+        this.indexFormatter=new IndexFormatter();
+
         this.addSettingTab(new mySettingTab(this.app, this));
 
-        //添加侧栏按钮：格式化此文档
         const ribbonIconEl = this.addRibbonIcon('dice', 'Format this note', (evt: MouseEvent) => {
             const markdownView =this.app.workspace.getActiveViewOfType(MarkdownView);
             if(markdownView){
@@ -34,7 +36,6 @@ export default class myPlugin extends Plugin {
             }
         });
 
-        //添加命令：格式化此文档
         this.addCommand({
             id: "obsidian-index-formatting-format_this_note",
             name: "Format this note",
@@ -53,15 +54,14 @@ export default class myPlugin extends Plugin {
         });
     }
 
-    //格式化一个文档
     format_a_note(markdownView:MarkdownView){
         new Notice("Index Formatting: This note is formatted.");
         const editor = markdownView.editor;
         const cursor = editor.getCursor();
         const lines = editor.getValue().split("\n");
-        const markdownIndex = new MarkdownIndex();
-        const newlines = markdownIndex.addMarkdownIndex(lines);
-        editor.setValue(newlines.join("\n"));
+        const markdownIndex = new IndexFormatter();
+        this.indexFormatter.format_index(lines);
+        editor.setValue(lines.join("\n"));
         editor.setCursor(cursor);
     }
 }
