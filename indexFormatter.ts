@@ -1,98 +1,95 @@
+function getArrayWithSixZero():Array<number>{
+    let array:number[]=[0,0,0,0,0,0,]
+    return array
+}
+
 export class IndexFormatter{
     public format_index(content: string[]){
         let isCodeBlock=false;
-        let titleIndexes=new Array<number>(6);
-        for(let i=0;i<titleIndexes.length;i++){
-            titleIndexes[i]=0;
-        }
-        let listIndexes=new Array<number>(6);
-        for(let i=0;i<listIndexes.length;i++){
-            listIndexes[i]=0;
-        }
+        let titleIndexes=getArrayWithSixZero();
+        let listIndexes=getArrayWithSixZero();
+        
+        //用于判断列表序号中断
+        let isBlankline=false;
+        let numNormalLines=0;
+        
         content.forEach((line,lineIndex,content)=>{
-            let [lineType,nowLevel]=get_line_index_type_level(line);
-            if(lineType==lineIndexTypes.codeBlockEdge || lineType==lineIndexTypes.orderedListStoper || lineType==lineIndexTypes.title){
-                for(let i=0;i<listIndexes.length;i++){
-                    listIndexes[i]=0;
-                }
-            }
-            if(lineType==lineIndexTypes.codeBlockEdge){
+            //code block
+            if(line.startsWith("```")){
                 isCodeBlock=!isCodeBlock;
+                listIndexes=getArrayWithSixZero();
             }
             else if(isCodeBlock){}
-            else if(lineType==lineIndexTypes.title){
-                titleIndexes[nowLevel-1]++;//this level`s index +1
+
+            //table and Horizontal Rule
+            else if(/^\|? *-[ -]*\|( *-[ -]*\|)*( *-[ -]*)?/.test(line) || /^ *---+ *$/.test(line)){
+                listIndexes=getArrayWithSixZero();
+            }
+
+            //title
+            else if(/^#+ /.test(line)){
+                listIndexes=getArrayWithSixZero();
+                let level=0;
+                for(let char of line){
+                    if(char=='#'){
+                        level++;
+                    }
+                    else{
+                        break;
+                    }
+                }
+                titleIndexes[level-1]++;//this level`s index +1
                 let indexText=' ';
                 for(let j=0;j<titleIndexes.length;j++){
-                    if(j<nowLevel){
+                    if(j<level){
                         indexText=indexText+titleIndexes[j]+'.';//index string
                     }
-                    else if(j>=nowLevel){
+                    else if(j>=level){
                         titleIndexes[j]=0;//set lower level index 0
                     }
                 }
                 //match markdown title`s ' ' and index
-                let re=/(?<=^#+)( +([0-9]+\.)* *)/ 
-                content[lineIndex]=line.replace(re,indexText+' ')
+                content[lineIndex]=line.replace(/(?<=^#+)( +([0-9]+\.)* *)/,indexText+' ')
             }
-            else if(lineType==lineIndexTypes.orderedList){
-                listIndexes[nowLevel-1]++;//this level`s index +1
+
+            //orderedList
+            else if(/^\t*[0-9]+\. /.test(line)){
+                isBlankline=false;
+                numNormalLines=0;
+                let level=1
+                for(let char of line){
+                    if(char=='\t'){
+                        level++;
+                    }
+                    else{
+                        break;
+                    }
+                }
+                listIndexes[level-1]++;//this level`s index +1
                 let indexText='';
                 for(let j=0;j<listIndexes.length;j++){
-                    if(j<nowLevel){
+                    if(j<level){
                         indexText=indexText+listIndexes[j]+'.';//index string
                     }
-                    else if(j>=nowLevel){
+                    else if(j>=level){
                         listIndexes[j]=0;//set lower level index 0
                     }
                 }
                 let re=/[0-9]+\. +/ 
                 content[lineIndex]=line.replace(re,indexText+' ')
             }
+
+            //normal line
+            else{
+                //两个以上普通行，其中包括至少一个空行，列表序号中断
+                if(line==''){
+                    isBlankline = true;
+                }
+                numNormalLines++;
+                if(isBlankline && numNormalLines>=2){
+                    listIndexes=getArrayWithSixZero();
+                }
+            }
         })
     }
-}
-
-enum lineIndexTypes{
-    title,
-    orderedList,
-    codeBlockEdge,
-    orderedListStoper,
-    others,
-}
-
-function get_line_index_type_level(line:string):[lineIndexTypes,number]{
-    let level=0;
-    let type=lineIndexTypes.others;
-    
-    if(line.startsWith("```")){
-        type=lineIndexTypes.codeBlockEdge;
-    }
-    else if(/^#+ /.test(line)){
-        type=lineIndexTypes.title;
-        for(let char of line){
-            if(char=='#'){
-                level++;
-            }
-            else{
-                break;
-            }
-        }
-    }
-    else if(/^\t*[0-9]+\. /.test(line)){
-        type=lineIndexTypes.orderedList;
-        level=1
-        for(let char of line){
-            if(char=='\t'){
-                level++;
-            }
-            else{
-                break;
-            }
-        }
-    }
-    else if(/^\| *-[ -]*\|( *-[ -]*\|)*( *-[ -]*)?|^ *---+ *$/.test(line)){
-        type=lineIndexTypes.orderedListStoper;
-    }
-    return [type,level]
 }
