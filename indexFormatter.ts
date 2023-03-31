@@ -39,6 +39,9 @@ export class IndexFormatter{
                 for(let char of line){
                     if(char=='#'){
                         level++;
+                        if(level==6){
+                            break
+                        }
                     }
                     else{
                         break;
@@ -46,7 +49,7 @@ export class IndexFormatter{
                 }
                 titleIndexes[level-1]++;//this level`s index +1
                 let indexText=' ';
-                for(let j=0;j<titleIndexes.length;j++){
+                for(let j=this.mySetting.titleIndex;j<titleIndexes.length;j++){
                     if(j<level){
                         indexText=indexText+titleIndexes[j]+'.';//index string
                     }
