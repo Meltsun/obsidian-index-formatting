@@ -12,7 +12,9 @@ export class IndexFormatter{
     }
     public format_index(content: string[]){
         let isCodeBlock=false;
+
         let titleIndexes=getArrayWithSixZero();
+
         let listIndexes=getArrayWithSixZero();
         
         //用于判断列表序号中断
@@ -62,30 +64,33 @@ export class IndexFormatter{
             }
 
             //orderedList
-            else if(/^\t*[0-9]+\. /.test(line)){
+            else if(/^\t*[0-9]+\. /.test(line) && this.mySetting.listIndex!='Disabled'){
                 isBlankline=false;
                 numNormalLines=0;
                 let level=1
                 for(let char of line){
                     if(char=='\t'){
                         level++;
+                        if(level==6){
+                            break
+                        }
                     }
                     else{
                         break;
                     }
                 }
-                listIndexes[level-1]++;//this level`s index +1
-                let indexText='';
-                for(let j=0;j<listIndexes.length;j++){
-                    if(j<level){
-                        indexText=indexText+listIndexes[j]+'.';//index string
-                    }
-                    else if(j>=level){
-                        listIndexes[j]=0;//set lower level index 0
-                    }
+                //Increase from any
+                if(listIndexes[level-1]==0 && this.mySetting.listIndex=='Increase from any'){
+                    let index=line.match(/[0-9]+/);
+                    listIndexes[level-1]=Number(index[0]);
                 }
-                let re=/[0-9]+\. +/ 
-                content[lineIndex]=line.replace(re,indexText+' ')
+                else{
+                    listIndexes[level-1]++;//this level`s index +1
+                }
+                for(let j=level;j<listIndexes.length;j++){
+                    listIndexes[j]=0;//set lower level index 0
+                }
+                content[lineIndex]=line.replace(/[0-9]+\. +/,listIndexes[level-1]+'. ')
             }
 
             //normal line
