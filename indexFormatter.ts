@@ -1,9 +1,15 @@
+import { MySetting } from "./mySettingTab";
+
 function getArrayWithSixZero():Array<number>{
     let array:number[]=[0,0,0,0,0,0,]
     return array
 }
 
 export class IndexFormatter{
+    mySetting:MySetting;
+    constructor (mySetting:MySetting){
+        this.mySetting = mySetting;
+    }
     public format_index(content: string[]){
         let isCodeBlock=false;
         let titleIndexes=getArrayWithSixZero();

@@ -1,18 +1,17 @@
 import { Plugin, MarkdownView,Notice} from "obsidian";
 //import { MarkdownIndex } from "./indexFormatter_old";
-import { mySettingTab} from "./mySettingTab";
+import {MySetting, MySettingTab} from "./mySettingTab";
 import {IndexFormatter} from "./indexFormatter"
 
-interface mySetting{
-    testSetting1: string;
-}
 
-const MY_DEFAULT_SETTING: mySetting = {
+const MY_DEFAULT_SETTING: MySetting = {
     testSetting1: 'test default setting',
+    listIndex:'Increase from 1.',
+    titleIndex:1
 }
 
 export default class myPlugin extends Plugin {
-    settings:mySetting
+    settings:MySetting
     indexFormatter:IndexFormatter
     async loadSettings() {
         this.settings = Object.assign({}, MY_DEFAULT_SETTING, await this.loadData());
@@ -25,9 +24,7 @@ export default class myPlugin extends Plugin {
     async onload() {
         await this.loadSettings();
 
-        this.indexFormatter=new IndexFormatter();
-
-        this.addSettingTab(new mySettingTab(this.app, this));
+        this.addSettingTab(new MySettingTab(this.app, this));
 
         const ribbonIconEl = this.addRibbonIcon('dice', 'Format this note', (evt: MouseEvent) => {
             const markdownView =this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -59,8 +56,8 @@ export default class myPlugin extends Plugin {
         const editor = markdownView.editor;
         const cursor = editor.getCursor();
         const lines = editor.getValue().split("\n");
-        const markdownIndex = new IndexFormatter();
-        this.indexFormatter.format_index(lines);
+        const markdownIndex = new IndexFormatter(this.settings);
+        markdownIndex.format_index(lines);
         editor.setValue(lines.join("\n"));
         editor.setCursor(cursor);
     }
