@@ -60,7 +60,7 @@ export class IndexFormatter{
                     }
                 }
                 //match markdown title`s ' ' and index
-                content[lineIndex]=line.replace(/(?<=^#+)( +([0-9]+\.)* *)/,indexText+' ')
+                content[lineIndex]=line.replace(/(?<=^#+)( +([0-9]+\.)* *)/,indexText.trimEnd()+' ');
             }
 
             //orderedList
